@@ -4,7 +4,7 @@
 #
 # Author:   Burke Libbey / Chromium 53
 # License:  BSD
-# Modified: <2008-09-28 22:40:51 CDT>
+# Modified: <2008-09-28 23:32:12 CDT>
 
 begin
   require 'rubygems'
@@ -32,6 +32,7 @@ class Crush
     # I think this works.
     @binding = lambda{ binding }
     @prompt  = lambda{ "#{$h.color(Dir.pwd.split('/').last,:magenta)} #{$h.color('%',:green)} "}
+    @aliases = { }
 
     Signal.trap("INT")  { }
     Signal.trap("STOP") { } # This doesn't seem to work
@@ -40,6 +41,10 @@ class Crush
 
   def prompt
     @prompt.call
+  end
+
+  def synonym(from, to)
+    @aliases.merge!({ from => to })
   end
 
   def evaluate(cmd, subexpr=nil)
@@ -56,6 +61,10 @@ class Crush
 
       # I'd like to be able to toss everything around with %x{},
       # but afaik I can only get the "fancy" output by writing directly to $stdout.
+
+      if @aliases[command_name]
+        cmd = "#{@aliases[command_name]} #{tokens[1..-1]}"
+      end
 
       if subexpr
         return `#{cmd}`
@@ -75,6 +84,7 @@ end
 
 if __FILE__ == $0
   crush = Crush.new
+  crush.instance_eval(File.read("#{ENV['HOME']}/.crushrc"))
   loop do
     line = Readline::readline(crush.prompt)
     begin
