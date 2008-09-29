@@ -2,12 +2,14 @@
 #
 # Author:   Burke Libbey / Chromium 53
 # License:  BSD
-# Modified: <2008-09-28 21:11:08 CDT>
+# Modified: <2008-09-28 21:13:33 CDT>
 
 require 'rubygems'
 require 'readline'
 require 'highline'
 
+# It's convenient to be able to access this in random lambdas.
+# May the coding gods have mercy on my soul.
 $h = HighLine.new
 
 class Array
@@ -22,8 +24,8 @@ end
 class Crush
   def initialize
     # Here we create a new empty binding to eval user input in
-    @binding = lambda{|| binding }
-    @prompt  = lambda{|| "#{$h.color(`pwd`.strip.split('/').last, :magenta)} #{$h.color('%', :green)} "}
+    @binding = lambda{ binding }
+    @prompt  = lambda{ "#{$h.color(`pwd`.strip.split('/').last, :magenta)} #{$h.color('%', :green)} "}
 
     Signal.trap("INT")  { }
     Signal.trap("STOP") { } # This doesn't seem to work. Maybe it's a zsh thing.
