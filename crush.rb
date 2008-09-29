@@ -4,7 +4,7 @@
 #
 # Author:   Burke Libbey / Chromium 53
 # License:  BSD
-# Modified: <2008-09-28 22:35:48 CDT>
+# Modified: <2008-09-28 22:40:51 CDT>
 
 begin
   require 'rubygems'
@@ -31,7 +31,7 @@ class Crush
     # Here we create a new empty binding to eval user input in.
     # I think this works.
     @binding = lambda{ binding }
-    @prompt  = lambda{ "#{$h.color(Dir.getwd.strip.split('/').last, :magenta)} #{$h.color('%', :green)} "}
+    @prompt  = lambda{ "#{$h.color(Dir.pwd.split('/').last,:magenta)} #{$h.color('%',:green)} "}
 
     Signal.trap("INT")  { }
     Signal.trap("STOP") { } # This doesn't seem to work
