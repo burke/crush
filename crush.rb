@@ -2,9 +2,13 @@
 #
 # Author:   Burke Libbey / Chromium 53
 # License:  BSD
-# Modified: <2008-09-28 20:36:42 CDT>
+# Modified: <2008-09-28 21:11:08 CDT>
 
+require 'rubygems'
 require 'readline'
+require 'highline'
+
+$h = HighLine.new
 
 class Array
   # This is almost certainly a bad idea, but it works nicely here.
@@ -16,12 +20,18 @@ class Array
 end
 
 class Crush
-  attr_accessor :prompt
-
   def initialize
     # Here we create a new empty binding to eval user input in
     @binding = lambda{|| binding }
-    @prompt  = "crush> "
+    @prompt  = lambda{|| "#{$h.color(`pwd`.strip.split('/').last, :magenta)} #{$h.color('%', :green)} "}
+
+    Signal.trap("INT")  { }
+    Signal.trap("STOP") { } # This doesn't seem to work. Maybe it's a zsh thing.
+
+  end
+
+  def prompt
+    @prompt.call
   end
 
   def evaluate(cmd, subexpr=nil)
@@ -57,13 +67,19 @@ if __FILE__ == $0
   crush = Crush.new
   loop do
     line = Readline::readline(crush.prompt)
-    Readline::HISTORY.push(line) rescue nil
+    begin
+      Readline::HISTORY.push(line)
+    rescue
+      # As far as I can tell, this only errors when line = ^D, so quit.
+      puts ""
+      exit 0
+    end
     begin
       crush.evaluate(line)
     rescue NameError
-      puts "Invalid command. Does not exist in path and is not valid ruby."
+      puts "crush: invalid command: #{line.split(' ').first}"
     rescue
-      puts "Unspecified Error!"
+      puts "crush: unspecified error"
     end
   end
 end
