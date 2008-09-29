@@ -4,7 +4,7 @@
 #
 # Author:   Burke Libbey / Chromium 53
 # License:  BSD
-# Modified: <2008-09-28 23:32:12 CDT>
+# Modified: <2008-09-28 23:34:36 CDT>
 
 begin
   require 'rubygems'
@@ -84,7 +84,7 @@ end
 
 if __FILE__ == $0
   crush = Crush.new
-  crush.instance_eval(File.read("#{ENV['HOME']}/.crushrc"))
+  crush.instance_eval(File.read("#{ENV['HOME']}/.crushrc")) rescue nil
   loop do
     line = Readline::readline(crush.prompt)
     begin
