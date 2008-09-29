@@ -2,7 +2,7 @@
 #
 # Author:   Burke Libbey / Chromium 53
 # License:  BSD
-# Modified: <2008-09-28 21:13:33 CDT>
+# Modified: <2008-09-28 21:50:03 CDT>
 
 require 'rubygems'
 require 'readline'
@@ -50,12 +50,19 @@ class Crush
     #  puts meth.call(tokens[1..-1])
 
     # If this program exists within the current PATH...
-    if not `which #{command_name}`.strip.empty?
+    if not IO.popen('-') {|f| f ? f.read : exec('which',command_name)}.strip.empty?
 
       # I'd like to be able to toss everything around with %x{},
       # but it seems to force TERM=dumb, so we need to do top-level
       # calls with system(), and handle output *inside* this method.
-      return subexpr ? `#{cmd}` : system( cmd )
+
+      if subexpr
+        return `#{cmd}`
+      else
+        # This is hackish, but I need to get the cwd back from the subprocess.
+        system("#{cmd};pwd>/tmp/crush_cwd")
+        Dir.chdir(File.read('/tmp/crush_cwd').strip)
+      end
 
     # No match. Parse it as ruby and hope for the best.
     else
