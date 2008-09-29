@@ -1,10 +1,15 @@
+#!/usr/bin/env ruby
+
 # Crush:    The Clockwork Ruby Shell
 #
 # Author:   Burke Libbey / Chromium 53
 # License:  BSD
-# Modified: <2008-09-28 21:50:03 CDT>
+# Modified: <2008-09-28 22:27:27 CDT>
 
-require 'rubygems'
+begin
+  require 'rubygems'
+rescue LoadError
+end
 require 'readline'
 require 'highline'
 
@@ -23,12 +28,13 @@ end
 
 class Crush
   def initialize
-    # Here we create a new empty binding to eval user input in
+    # Here we create a new empty binding to eval user input in.
+    # I think this works.
     @binding = lambda{ binding }
     @prompt  = lambda{ "#{$h.color(`pwd`.strip.split('/').last, :magenta)} #{$h.color('%', :green)} "}
 
     Signal.trap("INT")  { }
-    Signal.trap("STOP") { } # This doesn't seem to work. Maybe it's a zsh thing.
+    Signal.trap("STOP") { } # This doesn't seem to work
 
   end
 
@@ -45,16 +51,11 @@ class Crush
     tokens = cmd.split(' ')
     command_name = tokens[0]
 
-    # If this has been defined as a Crush override method...
-    #if (meth = Crush.method(command_name) rescue nil)
-    #  puts meth.call(tokens[1..-1])
-
     # If this program exists within the current PATH...
     if not IO.popen('-') {|f| f ? f.read : exec('which',command_name)}.strip.empty?
 
       # I'd like to be able to toss everything around with %x{},
-      # but it seems to force TERM=dumb, so we need to do top-level
-      # calls with system(), and handle output *inside* this method.
+      # but afaik I can only get the "fancy" output by writing directly to $stdout.
 
       if subexpr
         return `#{cmd}`
